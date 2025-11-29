@@ -94,5 +94,6 @@ export class EventEmitter<E extends EventMap> implements Eventable<E> {
 
     clear(): void {
         this.#subscribers = {};
+        this.#onceSubscribers = {};
     }
 }
