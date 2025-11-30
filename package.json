@@ -1,6 +1,6 @@
 {
   "name": "@just-io/utils",
-  "version": "1.0.2",
+  "version": "1.1.0",
   "description": "Utility functional",
   "types": "dist/types",
   "main": "dist/cjs/index.js",
