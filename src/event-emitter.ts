@@ -10,6 +10,10 @@ export class Notifier<E extends unknown[]> implements Notifiable<E> {
 
     #onceSubscribers: WeakSet<Subscriber<E>> = new WeakSet();
 
+    getSuscribers(): Set<Subscriber<E>> {
+        return this.#subscribers;
+    }
+
     subscribe(subscriber: Subscriber<E>, options?: { once?: boolean }): this {
         this.#subscribers.add(subscriber);
         if (options?.once) {

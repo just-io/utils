@@ -1,12 +1,21 @@
-type DeepMapNode<T> = {
-    children: Map<unknown, DeepMapNode<T>>;
-    value?: T;
+type DeepMapNode<K, V> = {
+    children: Map<K, DeepMapNode<K, V>>;
+    value?: V;
 };
 
-export class DeepMap<K, V> {
-    #rootNode: DeepMapNode<V> = {
+export class DeepMap<K, V> extends Map<K[], V> {
+    #rootNode: DeepMapNode<K, V> = {
         children: new Map(),
     };
+
+    *#entries(node: DeepMapNode<K, V>, key: K[]): Generator<[K[], V]> {
+        if (node.value !== undefined) {
+            yield [key, node.value];
+        }
+        for (const child of node.children) {
+            yield* this.#entries(child[1], key.concat(child[0]));
+        }
+    }
 
     clear(): void {
         this.#rootNode = {
@@ -55,7 +64,7 @@ export class DeepMap<K, V> {
 
     delete(keys: K[]): boolean {
         let node = this.#rootNode;
-        const entries: [key: unknown, node: DeepMapNode<V>][] = [[undefined, this.#rootNode]];
+        const entries: [key: K, node: DeepMapNode<K, V>][] = [[undefined as K, this.#rootNode]];
         for (const key of keys) {
             if (!node.children.has(key)) {
                 return false;
@@ -80,5 +89,41 @@ export class DeepMap<K, V> {
         const value = this.get(keys);
         this.delete(keys);
         return value;
+    }
+
+    get size(): number {
+        let count = 0;
+
+        for (const {} of this.#entries(this.#rootNode, [])) {
+            count++;
+        }
+
+        return count;
+    }
+
+    forEach(callbackfn: (value: V, key: K[], map: Map<K[], V>) => void): void {
+        for (const entry of this.#entries(this.#rootNode, [])) {
+            callbackfn(entry[1], entry[0], this);
+        }
+    }
+
+    [Symbol.iterator](): MapIterator<[K[], V]> {
+        return this.#entries(this.#rootNode, []);
+    }
+
+    entries(): MapIterator<[K[], V]> {
+        return this.#entries(this.#rootNode, []);
+    }
+
+    *keys(): MapIterator<K[]> {
+        for (const entry of this.#entries(this.#rootNode, [])) {
+            yield entry[0];
+        }
+    }
+
+    *values(): MapIterator<V> {
+        for (const entry of this.#entries(this.#rootNode, [])) {
+            yield entry[1];
+        }
     }
 }

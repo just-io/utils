@@ -100,9 +100,11 @@ describe('debounceByKey', () => {
         const fn2 = context.mock.fn();
         function notify(event: { type: string; at: number }): void {
             if (event.type === 'change') {
+                assert.deepStrictEqual(event, { type: 'change', at: 10 });
                 fn1();
             }
             if (event.type === 'update') {
+                assert.deepStrictEqual(event, { type: 'update', at: 0 });
                 fn2();
             }
         }
