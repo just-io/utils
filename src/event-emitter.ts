@@ -49,6 +49,10 @@ export interface Eventable<E extends EventMap> {
     off<K extends keyof E>(event: K, subscriber: Subscriber<E[K]>): boolean;
 }
 
+export type EventList<E extends EventMap> = {
+    [K in keyof E]: [K, ...E[K]];
+}[keyof E];
+
 export class EventEmitter<E extends EventMap> implements Eventable<E> {
     #subscribers: {
         [K in keyof E]?: Set<Subscriber<E[K]>>;
