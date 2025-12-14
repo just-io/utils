@@ -88,6 +88,8 @@ export class EventEmitter<E extends EventMap> implements Eventable<E> {
         return this.getSuscribers(event).delete(subscriber);
     }
 
+    emit<K extends keyof E>(event: K, ...args: E[K]): void;
+    emit(...eventList: EventList<E>): void;
     emit<K extends keyof E>(event: K, ...args: E[K]): void {
         if (!this.#subscribers[event]) {
             return;

@@ -119,15 +119,31 @@ describe('EventEmitter', () => {
 
     test('should call subscriber on one event by common type', () => {
         // eslint-disable-next-line @typescript-eslint/no-unused-vars
-        const fn = mock.fn((first: string, second: number) => {});
+        const fnOne = mock.fn((first: number) => {});
+        // eslint-disable-next-line @typescript-eslint/no-unused-vars
+        const fnTwo = mock.fn((first: string, second: number) => {});
         const eventEmitter = new EventEmitter<EventMap>();
-        eventEmitter.on('two', fn);
-        assert.deepEqual(fn.mock.callCount(), 0);
+        eventEmitter.on('one', fnOne);
+        eventEmitter.on('two', fnTwo);
+        assert.deepEqual(fnOne.mock.callCount(), 0);
+        assert.deepEqual(fnTwo.mock.callCount(), 0);
 
-        const event: EList = ['two', '2', 1];
+        const event = ['two', '2', 1] as EList;
         eventEmitter.emit(...event);
 
-        assert.deepEqual(fn.mock.callCount(), 1);
+        assert.deepEqual(fnOne.mock.callCount(), 0);
+        assert.deepEqual(fnTwo.mock.callCount(), 1);
+
+        const events: EList[] = [
+            ['one', 1],
+            ['two', '2', 1],
+        ];
+        for (const newEvent of events) {
+            eventEmitter.emit(...newEvent);
+        }
+
+        assert.deepEqual(fnOne.mock.callCount(), 1);
+        assert.deepEqual(fnTwo.mock.callCount(), 2);
     });
 
     test('should call subscribers on two event', () => {
