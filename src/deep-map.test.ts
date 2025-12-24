@@ -3,6 +3,43 @@ import { describe, test, mock } from 'node:test';
 import { DeepMap } from './deep-map';
 
 describe('DeepMap', () => {
+    describe('method new', () => {
+        test('should create with zero entries', () => {
+            const deepMap = new DeepMap<string, string>();
+
+            assert.equal(deepMap.size, 0);
+        });
+
+        test('should create with one entry', () => {
+            const deepMap = new DeepMap<string, string>([[['one'], 'str']]);
+
+            assert.equal(deepMap.get(['one']), 'str');
+        });
+
+        test('should create value with two entries', () => {
+            const deepMap = new DeepMap<string, string>([[['one'], 'str'], [['one', 'two'], 'str']]);
+
+            assert.equal(deepMap.get(['one']), 'str');
+            assert.equal(deepMap.get(['one', 'two']), 'str');
+        });
+
+        test('should create value by other map', () => {
+            const originDeepMap = new DeepMap<string, string>([[['one'], 'str'], [['one', 'two'], 'str']]);
+            const deepMap = new DeepMap<string, string>(originDeepMap);
+
+            assert.equal(originDeepMap.get(['one']), 'str');
+            assert.equal(originDeepMap.get(['one', 'two']), 'str');
+            assert.equal(deepMap.get(['one']), 'str');
+            assert.equal(deepMap.get(['one', 'two']), 'str');
+
+            originDeepMap.delete(['one']);
+            originDeepMap.delete(['one', 'two']);
+
+            assert.equal(deepMap.get(['one']), 'str');
+            assert.equal(deepMap.get(['one', 'two']), 'str');
+        });
+    });
+
     describe('method set', () => {
         test('should set and get value with zero keys', () => {
             const deepMap = new DeepMap<string, string>();
@@ -106,35 +143,35 @@ describe('DeepMap', () => {
         });
     });
 
-    describe('method extract', () => {
-        test('should extract value with zero keys', () => {
+    describe('method take', () => {
+        test('should take value with zero keys', () => {
             const deepMap = new DeepMap<string, string>();
             deepMap.set([], 'str');
 
-            assert.equal(deepMap.extract([]), 'str');
+            assert.equal(deepMap.take([]), 'str');
             assert.equal(deepMap.has([]), false);
         });
 
-        test('should extract value with one key', () => {
+        test('should take value with one key', () => {
             const deepMap = new DeepMap<string, string>();
             deepMap.set(['one'], 'str');
 
-            assert.equal(deepMap.extract(['one']), 'str');
+            assert.equal(deepMap.take(['one']), 'str');
             assert.equal(deepMap.has(['one']), false);
         });
 
-        test('should extract value with two key', () => {
+        test('should take value with two key', () => {
             const deepMap = new DeepMap<string, string>();
             deepMap.set(['one', 'two'], 'str');
 
-            assert.equal(deepMap.extract(['one', 'two']), 'str');
+            assert.equal(deepMap.take(['one', 'two']), 'str');
             assert.equal(deepMap.has(['one', 'two']), false);
         });
 
-        test('should extract on unset keys', () => {
+        test('should take on unset keys', () => {
             const deepMap = new DeepMap<string, string>();
 
-            assert.equal(deepMap.extract([]), undefined);
+            assert.equal(deepMap.take([]), undefined);
             assert.equal(deepMap.has([]), false);
         });
     });
@@ -283,6 +320,104 @@ describe('DeepMap', () => {
             }
 
             assert.deepStrictEqual(arr, [
+                [[], 'str'],
+                [['one'], 'str'],
+                [['one', 'two'], 'str'],
+            ]);
+        });
+    });
+
+    describe('method clone', () => {
+        test('should clone map by zero keys', () => {
+            const deepMap = new DeepMap<string, string>();
+            const clonedDeepMap = deepMap.clone([]);
+
+            assert.equal(clonedDeepMap.size, 0);
+        });
+
+        test('should clone map on unexisting key', () => {
+            const deepMap = new DeepMap<string, string>();
+            const clonedDeepMap = deepMap.clone(['one']);
+
+            assert.equal(clonedDeepMap.size, 0);
+        });
+
+        test('should clone map', () => {
+            const deepMap = new DeepMap<string, string>();
+            deepMap.set([], 'str');
+            deepMap.set(['one'], 'str');
+            deepMap.set(['one', 'two'], 'str');
+            const clonedDeepMap = deepMap.clone(['one']);
+
+            assert.deepStrictEqual(Array.from(clonedDeepMap), [
+                [[], 'str'],
+                [['two'], 'str'],
+            ]);
+        });
+    });
+
+    describe('method extract', () => {
+        test('should extract map by zero keys', () => {
+            const deepMap = new DeepMap<string, string>();
+            const extractedDeepMap = deepMap.extract([]);
+
+            assert.equal(deepMap.size, 0);
+            assert.equal(extractedDeepMap.size, 0);
+        });
+
+        test('should extract map on unexisting key', () => {
+            const deepMap = new DeepMap<string, string>();
+            const extractedDeepMap = deepMap.extract(['one']);
+
+            assert.equal(deepMap.size, 0);
+            assert.equal(extractedDeepMap.size, 0);
+        });
+
+        test('should extract map', () => {
+            const deepMap = new DeepMap<string, string>();
+            deepMap.set([], 'str');
+            deepMap.set(['one'], 'str');
+            deepMap.set(['one', 'two'], 'str');
+            const extractedDeepMap = deepMap.extract(['one']);
+
+            assert.deepStrictEqual(Array.from(deepMap), [
+                [[], 'str'],
+            ]);
+
+            assert.deepStrictEqual(Array.from(extractedDeepMap), [
+                [[], 'str'],
+                [['two'], 'str'],
+            ]);
+        });
+    });
+
+    describe('method append', () => {
+        test('should append zero entries', () => {
+            const deepMap = new DeepMap<string, string>();
+            deepMap.append([], []);
+
+            assert.equal(deepMap.size, 0);
+        });
+
+        test('should append to unexisting key', () => {
+            const deepMap = new DeepMap<string, string>();
+            deepMap.append(['one'], [[['two'], 'str']]);
+
+            assert.equal(deepMap.size, 1);
+            assert.deepStrictEqual(Array.from(deepMap), [
+                [['one', 'two'], 'str'],
+            ]);
+        });
+
+        test('should append map', () => {
+            const deepMap = new DeepMap<string, string>();
+            deepMap.append([], [
+                [[], 'str'],
+                [['one'], 'str'],
+                [['one', 'two'], 'str'],
+            ]);
+
+            assert.deepStrictEqual(Array.from(deepMap), [
                 [[], 'str'],
                 [['one'], 'str'],
                 [['one', 'two'], 'str'],

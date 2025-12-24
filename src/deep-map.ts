@@ -8,6 +8,27 @@ export class DeepMap<K, V> extends Map<K[], V> {
         children: new Map(),
     };
 
+    constructor(iterable?: Iterable<readonly [K[], V]> | null) {
+        super();
+        if (iterable) {
+            for (const entry of iterable) {
+                this.set(entry[0], entry[1]);
+            }
+        }
+    }
+
+    #node(keys: K[] | K): DeepMapNode<K, V> | undefined {
+        let node = this.#rootNode;
+        for (const key of (Array.isArray(keys) ? keys : [keys])) {
+            if (!node.children.has(key)) {
+                return undefined;
+            }
+            node = node.children.get(key)!;
+        }
+
+        return node;
+    }
+
     *#entries(node: DeepMapNode<K, V>, key: K[]): Generator<[K[], V]> {
         if (node.value !== undefined) {
             yield [key, node.value];
@@ -23,9 +44,9 @@ export class DeepMap<K, V> extends Map<K[], V> {
         };
     }
 
-    set(keys: K[], value: V): this {
+    set(keys: K[] | K, value: V): this {
         let node = this.#rootNode;
-        for (const key of keys) {
+        for (const key of (Array.isArray(keys) ? keys : [keys])) {
             if (!node.children.has(key)) {
                 node.children.set(key, {
                     children: new Map(),
@@ -38,21 +59,13 @@ export class DeepMap<K, V> extends Map<K[], V> {
         return this;
     }
 
-    get(keys: K[]): V | undefined {
-        let node = this.#rootNode;
-        for (const key of keys) {
-            if (!node.children.has(key)) {
-                return undefined;
-            }
-            node = node.children.get(key)!;
-        }
-
-        return node.value;
+    get(keys: K[] | K): V | undefined {
+        return this.#node(keys)?.value;
     }
 
-    has(keys: K[]): boolean {
+    has(keys: K[] | K): boolean {
         let node = this.#rootNode;
-        for (const key of keys) {
+        for (const key of (Array.isArray(keys) ? keys : [keys])) {
             if (!node.children.has(key)) {
                 return false;
             }
@@ -62,10 +75,10 @@ export class DeepMap<K, V> extends Map<K[], V> {
         return node.value !== undefined;
     }
 
-    delete(keys: K[]): boolean {
+    delete(keys: K[] | K): boolean {
         let node = this.#rootNode;
         const entries: [key: K, node: DeepMapNode<K, V>][] = [[undefined as K, this.#rootNode]];
-        for (const key of keys) {
+        for (const key of (Array.isArray(keys) ? keys : [keys])) {
             if (!node.children.has(key)) {
                 return false;
             }
@@ -85,10 +98,44 @@ export class DeepMap<K, V> extends Map<K[], V> {
         return true;
     }
 
-    extract(keys: K[]): V | undefined {
+    take(keys: K[] | K): V | undefined {
         const value = this.get(keys);
         this.delete(keys);
         return value;
+    }
+
+    clone(keys: K[] | K): DeepMap<K, V> {
+        const node = this.#node(keys);
+        const map = new DeepMap<K, V>();
+        if (node) {
+            for (const entry of this.#entries(node, [])) {
+                map.set(entry[0], entry[1]);
+            }
+        }
+        return map;
+    }
+
+    extract(keys: K[] | K): DeepMap<K, V> {
+        const node = this.#node(keys);
+        const map = new DeepMap<K, V>();
+        if (node) {
+            for (const entry of this.#entries(node, [])) {
+                map.set(entry[0], entry[1]);
+            }
+            if (node.value !== undefined) {
+                map.set([], node.value);
+            }
+            node.children = new Map();
+            node.value = undefined;
+        }
+        return map;
+    }
+
+    append(keys: K[] | K, iterable: Iterable<readonly [K[], V]>): this {
+        for (const entry of iterable) {
+            this.set((Array.isArray(keys) ? keys : [keys]).concat(entry[0]), entry[1]);
+        }
+        return this;
     }
 
     get size(): number {
