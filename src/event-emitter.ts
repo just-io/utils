@@ -36,8 +36,9 @@ export class Notifier<E extends unknown[]> implements Notifiable<E> {
         });
     }
 
-    clear(): void {
+    unsubscribeAll(): void {
         this.#subscribers = new Set();
+        this.#onceSubscribers = new WeakSet();
     }
 }
 
@@ -49,9 +50,41 @@ export interface Eventable<E extends EventMap> {
     off<K extends keyof E>(event: K, subscriber: Subscriber<E[K]>): boolean;
 }
 
-export type EventList<E extends EventMap> = {
+export type EventTuple<E extends EventMap> = {
     [K in keyof E]: [K, ...E[K]];
 }[keyof E];
+
+export class EventStore<E extends EventMap> {
+    #eventEmitter: EventEmitter<E>;
+
+    #eventTuples: EventTuple<E>[] = [];
+
+    constructor(eventEmitter: EventEmitter<E>) {
+        this.#eventEmitter = eventEmitter;
+    }
+
+    add<K extends keyof E>(event: K, ...args: E[K]): void;
+    add(...eventTuple: EventTuple<E>): void;
+    add<K extends keyof E>(event: K, ...args: E[K]): void {
+        this.#eventTuples.push([event, ...args]);
+    }
+
+    emit(): void {
+        for (const eventTuple of this.#eventTuples) {
+            this.#eventEmitter.emit(...eventTuple);
+        }
+        this.#eventTuples = [];
+    }
+
+    consume(eventStore: EventStore<E>): void {
+        this.#eventTuples.push(...eventStore.#eventTuples);
+        eventStore.#eventTuples = [];
+    }
+
+    clean(): void {
+        this.#eventTuples = [];
+    }
+}
 
 export class EventEmitter<E extends EventMap> implements Eventable<E> {
     #subscribers: {
@@ -89,7 +122,7 @@ export class EventEmitter<E extends EventMap> implements Eventable<E> {
     }
 
     emit<K extends keyof E>(event: K, ...args: E[K]): void;
-    emit(...eventList: EventList<E>): void;
+    emit(...eventTuple: EventTuple<E>): void;
     emit<K extends keyof E>(event: K, ...args: E[K]): void {
         if (!this.#subscribers[event]) {
             return;
@@ -102,8 +135,19 @@ export class EventEmitter<E extends EventMap> implements Eventable<E> {
         });
     }
 
-    clear(): void {
-        this.#subscribers = {};
-        this.#onceSubscribers = {};
+    unsubscribeAll(): void;
+    unsubscribeAll<K extends keyof E>(event: K): void;
+    unsubscribeAll<K extends keyof E>(event?: K): void {
+        if (event) {
+            this.#subscribers[event] = new Set();
+            this.#onceSubscribers[event] = new WeakSet();
+        } else {
+            this.#subscribers = {};
+            this.#onceSubscribers = {};
+        }
+    }
+
+    makeStore(): EventStore<E> {
+        return new EventStore(this);
     }
 }

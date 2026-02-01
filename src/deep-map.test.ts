@@ -17,14 +17,20 @@ describe('DeepMap', () => {
         });
 
         test('should create value with two entries', () => {
-            const deepMap = new DeepMap<string, string>([[['one'], 'str'], [['one', 'two'], 'str']]);
+            const deepMap = new DeepMap<string, string>([
+                [['one'], 'str'],
+                [['one', 'two'], 'str'],
+            ]);
 
             assert.equal(deepMap.get(['one']), 'str');
             assert.equal(deepMap.get(['one', 'two']), 'str');
         });
 
         test('should create value by other map', () => {
-            const originDeepMap = new DeepMap<string, string>([[['one'], 'str'], [['one', 'two'], 'str']]);
+            const originDeepMap = new DeepMap<string, string>([
+                [['one'], 'str'],
+                [['one', 'two'], 'str'],
+            ]);
             const deepMap = new DeepMap<string, string>(originDeepMap);
 
             assert.equal(originDeepMap.get(['one']), 'str');
@@ -380,9 +386,7 @@ describe('DeepMap', () => {
             deepMap.set(['one', 'two'], 'str');
             const extractedDeepMap = deepMap.extract(['one']);
 
-            assert.deepStrictEqual(Array.from(deepMap), [
-                [[], 'str'],
-            ]);
+            assert.deepStrictEqual(Array.from(deepMap), [[[], 'str']]);
 
             assert.deepStrictEqual(Array.from(extractedDeepMap), [
                 [[], 'str'],
@@ -404,18 +408,19 @@ describe('DeepMap', () => {
             deepMap.append(['one'], [[['two'], 'str']]);
 
             assert.equal(deepMap.size, 1);
-            assert.deepStrictEqual(Array.from(deepMap), [
-                [['one', 'two'], 'str'],
-            ]);
+            assert.deepStrictEqual(Array.from(deepMap), [[['one', 'two'], 'str']]);
         });
 
         test('should append map', () => {
             const deepMap = new DeepMap<string, string>();
-            deepMap.append([], [
-                [[], 'str'],
-                [['one'], 'str'],
-                [['one', 'two'], 'str'],
-            ]);
+            deepMap.append(
+                [],
+                [
+                    [[], 'str'],
+                    [['one'], 'str'],
+                    [['one', 'two'], 'str'],
+                ],
+            );
 
             assert.deepStrictEqual(Array.from(deepMap), [
                 [[], 'str'],

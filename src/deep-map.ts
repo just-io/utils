@@ -19,7 +19,7 @@ export class DeepMap<K, V> extends Map<K[], V> {
 
     #node(keys: K[] | K): DeepMapNode<K, V> | undefined {
         let node = this.#rootNode;
-        for (const key of (Array.isArray(keys) ? keys : [keys])) {
+        for (const key of Array.isArray(keys) ? keys : [keys]) {
             if (!node.children.has(key)) {
                 return undefined;
             }
@@ -46,7 +46,7 @@ export class DeepMap<K, V> extends Map<K[], V> {
 
     set(keys: K[] | K, value: V): this {
         let node = this.#rootNode;
-        for (const key of (Array.isArray(keys) ? keys : [keys])) {
+        for (const key of Array.isArray(keys) ? keys : [keys]) {
             if (!node.children.has(key)) {
                 node.children.set(key, {
                     children: new Map(),
@@ -65,7 +65,7 @@ export class DeepMap<K, V> extends Map<K[], V> {
 
     has(keys: K[] | K): boolean {
         let node = this.#rootNode;
-        for (const key of (Array.isArray(keys) ? keys : [keys])) {
+        for (const key of Array.isArray(keys) ? keys : [keys]) {
             if (!node.children.has(key)) {
                 return false;
             }
@@ -78,7 +78,7 @@ export class DeepMap<K, V> extends Map<K[], V> {
     delete(keys: K[] | K): boolean {
         let node = this.#rootNode;
         const entries: [key: K, node: DeepMapNode<K, V>][] = [[undefined as K, this.#rootNode]];
-        for (const key of (Array.isArray(keys) ? keys : [keys])) {
+        for (const key of Array.isArray(keys) ? keys : [keys]) {
             if (!node.children.has(key)) {
                 return false;
             }
