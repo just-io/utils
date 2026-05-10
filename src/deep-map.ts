@@ -85,6 +85,9 @@ export class DeepMap<K, V> extends Map<K[], V> {
             node = node.children.get(key)!;
             entries.unshift([key, node]);
         }
+        if (node.value === undefined) {
+            return false;
+        }
         node.value = undefined;
 
         for (let i = 0; i < entries.length - 1; i++) {

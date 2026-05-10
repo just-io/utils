@@ -102,6 +102,12 @@ describe('DeepMap', () => {
 
             assert.equal(deepMap.has(['one']), false);
         });
+
+        test('should return false with zero keys', () => {
+            const deepMap = new DeepMap<string, string>();
+
+            assert.equal(deepMap.has([]), false);
+        });
     });
 
     describe('method delete', () => {
@@ -111,7 +117,7 @@ describe('DeepMap', () => {
 
             assert.equal(deepMap.has([]), true);
 
-            deepMap.delete([]);
+            assert.equal(deepMap.delete([]), true);
 
             assert.equal(deepMap.has([]), false);
         });
@@ -122,7 +128,7 @@ describe('DeepMap', () => {
 
             assert.equal(deepMap.has(['one']), true);
 
-            deepMap.delete(['one']);
+            assert.equal(deepMap.delete(['one']), true);
 
             assert.equal(deepMap.has(['one']), false);
         });
@@ -133,9 +139,20 @@ describe('DeepMap', () => {
 
             assert.equal(deepMap.has(['one', 'two']), true);
 
-            deepMap.delete(['one', 'two']);
+            assert.equal(deepMap.delete(['one', 'two']), true);
 
             assert.equal(deepMap.has(['one', 'two']), false);
+        });
+
+        test('should delete value with one key on two keys', () => {
+            const deepMap = new DeepMap<string, string>();
+            deepMap.set(['one', 'two'], 'str');
+
+            assert.equal(deepMap.has(['one']), false);
+
+            assert.equal(deepMap.delete(['one']), false);
+
+            assert.equal(deepMap.has(['one']), false);
         });
 
         test('should delete on unset keys', () => {
@@ -143,7 +160,7 @@ describe('DeepMap', () => {
 
             assert.equal(deepMap.has([]), false);
 
-            deepMap.delete([]);
+            assert.equal(deepMap.delete([]), false);
 
             assert.equal(deepMap.has([]), false);
         });
