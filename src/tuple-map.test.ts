@@ -312,4 +312,47 @@ describe('TupleMap', () => {
             ]);
         });
     });
+    describe('method getOrInsert', () => {
+        test('should set and get value', () => {
+            const tupleMap = new TupleMap<[string, number, Date], string>();
+            const gotValue = tupleMap.getOrInsert(['one', 1, date], 'str');
+
+            assert.equal(gotValue, 'str');
+            assert.equal(tupleMap.get(['one', 1, date]), 'str');
+        });
+
+        test('should not set and get value when it exists', () => {
+            const tupleMap = new TupleMap<[string, number, Date], { value: string }>();
+            const value = { value: 'str' };
+            tupleMap.set(['one', 1, date], value);
+            const gotValue = tupleMap.getOrInsert(['one', 1, date], { value: 'str' });
+
+            assert.equal(value, gotValue);
+            assert.equal(tupleMap.get(['one', 1, date]), value);
+        });
+    });
+
+    describe('method getOrInsertComputed', () => {
+        test('should set and get value', () => {
+            const tupleMap = new TupleMap<[string, number, Date], string>();
+            const gotValue = tupleMap.getOrInsertComputed(['one', 1, date], (key) =>
+                String(key.length),
+            );
+
+            assert.equal(gotValue, '3');
+            assert.equal(tupleMap.get(['one', 1, date]), '3');
+        });
+
+        test('should not set and get value when it exists', () => {
+            const tupleMap = new TupleMap<[string, number, Date], { value: string }>();
+            const value = { value: 'str' };
+            tupleMap.set(['one', 1, date], value);
+            const gotValue = tupleMap.getOrInsertComputed(['one', 1, date], () => ({
+                value: 'str',
+            }));
+
+            assert.equal(value, gotValue);
+            assert.equal(tupleMap.get(['one', 1, date]), value);
+        });
+    });
 });

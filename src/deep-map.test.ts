@@ -446,4 +446,44 @@ describe('DeepMap', () => {
             ]);
         });
     });
+
+    describe('method getOrInsert', () => {
+        test('should set and get value', () => {
+            const deepMap = new DeepMap<string, string>();
+            const gotValue = deepMap.getOrInsert(['one'], 'str');
+
+            assert.equal(gotValue, 'str');
+            assert.equal(deepMap.get(['one']), 'str');
+        });
+
+        test('should not set and get value when it exists', () => {
+            const deepMap = new DeepMap<string, { value: string }>();
+            const value = { value: 'str' };
+            deepMap.set(['one'], value);
+            const gotValue = deepMap.getOrInsert(['one'], { value: 'str' });
+
+            assert.equal(value, gotValue);
+            assert.equal(deepMap.get(['one']), value);
+        });
+    });
+
+    describe('method getOrInsertComputed', () => {
+        test('should set and get value', () => {
+            const deepMap = new DeepMap<string, string>();
+            const gotValue = deepMap.getOrInsertComputed(['one', 'two'], (key) => key.join('/'));
+
+            assert.equal(gotValue, 'one/two');
+            assert.equal(deepMap.get(['one', 'two']), 'one/two');
+        });
+
+        test('should not set and get value when it exists', () => {
+            const deepMap = new DeepMap<string, { value: string }>();
+            const value = { value: 'str' };
+            deepMap.set(['one'], value);
+            const gotValue = deepMap.getOrInsertComputed(['one'], () => ({ value: 'str' }));
+
+            assert.equal(value, gotValue);
+            assert.equal(deepMap.get(['one']), value);
+        });
+    });
 });

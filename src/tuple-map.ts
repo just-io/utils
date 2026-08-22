@@ -2,11 +2,10 @@ type TupleMapNode<Keys extends unknown[], V> = Keys extends [infer K, ...infer R
     ? Map<K, TupleMapNode<R, V>>
     : { value: V };
 
-export class TupleMap<K extends [unknown, ...unknown[]], V> extends Map<K, V> {
+export class TupleMap<K extends [unknown, ...unknown[]], V> implements Map<K, V> {
     #rootNode: TupleMapNode<K, V> = new Map() as TupleMapNode<K, V>;
 
     constructor(iterable?: Iterable<readonly [K, V]> | null) {
-        super();
         if (iterable) {
             for (const entry of iterable) {
                 this.set(entry[0], entry[1]);
@@ -131,9 +130,9 @@ export class TupleMap<K extends [unknown, ...unknown[]], V> extends Map<K, V> {
         return count;
     }
 
-    forEach(callbackfn: (value: V, keys: K, map: Map<K, V>) => void): void {
+    forEach(callbackfn: (value: V, keys: K, map: Map<K, V>) => void, thisArg?: unknown): void {
         for (const entry of this.#entries(this.#rootNode, [])) {
-            callbackfn(entry[1], entry[0], this);
+            callbackfn.call(thisArg, entry[1], entry[0], this);
         }
     }
 
@@ -155,5 +154,26 @@ export class TupleMap<K extends [unknown, ...unknown[]], V> extends Map<K, V> {
         for (const entry of this.#entries(this.#rootNode, [])) {
             yield entry[1];
         }
+    }
+
+    [Symbol.toStringTag]: string = 'TupleMap';
+
+    getOrInsert(key: K, defaultValue: V): V {
+        if (this.has(key)) {
+            return this.get(key)!;
+        }
+        this.set(key, defaultValue);
+
+        return defaultValue;
+    }
+
+    getOrInsertComputed(key: K, callback: (key: K) => V): V {
+        if (this.has(key)) {
+            return this.get(key)!;
+        }
+        const value = callback(key);
+        this.set(key, value);
+
+        return value;
     }
 }

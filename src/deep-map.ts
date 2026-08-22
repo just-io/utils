@@ -3,13 +3,12 @@ type DeepMapNode<K, V> = {
     value?: V;
 };
 
-export class DeepMap<K, V> extends Map<K[], V> {
+export class DeepMap<K, V> implements Map<K[], V> {
     #rootNode: DeepMapNode<K, V> = {
         children: new Map(),
     };
 
     constructor(iterable?: Iterable<readonly [K[], V]> | null) {
-        super();
         if (iterable) {
             for (const entry of iterable) {
                 this.set(entry[0], entry[1]);
@@ -17,9 +16,9 @@ export class DeepMap<K, V> extends Map<K[], V> {
         }
     }
 
-    #node(keys: K[] | K): DeepMapNode<K, V> | undefined {
+    #node(keys: K[]): DeepMapNode<K, V> | undefined {
         let node = this.#rootNode;
-        for (const key of Array.isArray(keys) ? keys : [keys]) {
+        for (const key of keys) {
             if (!node.children.has(key)) {
                 return undefined;
             }
@@ -44,9 +43,9 @@ export class DeepMap<K, V> extends Map<K[], V> {
         };
     }
 
-    set(keys: K[] | K, value: V): this {
+    set(keys: K[], value: V): this {
         let node = this.#rootNode;
-        for (const key of Array.isArray(keys) ? keys : [keys]) {
+        for (const key of keys) {
             if (!node.children.has(key)) {
                 node.children.set(key, {
                     children: new Map(),
@@ -59,13 +58,13 @@ export class DeepMap<K, V> extends Map<K[], V> {
         return this;
     }
 
-    get(keys: K[] | K): V | undefined {
+    get(keys: K[]): V | undefined {
         return this.#node(keys)?.value;
     }
 
-    has(keys: K[] | K): boolean {
+    has(keys: K[]): boolean {
         let node = this.#rootNode;
-        for (const key of Array.isArray(keys) ? keys : [keys]) {
+        for (const key of keys) {
             if (!node.children.has(key)) {
                 return false;
             }
@@ -75,10 +74,10 @@ export class DeepMap<K, V> extends Map<K[], V> {
         return node.value !== undefined;
     }
 
-    delete(keys: K[] | K): boolean {
+    delete(keys: K[]): boolean {
         let node = this.#rootNode;
         const entries: [key: K, node: DeepMapNode<K, V>][] = [[undefined as K, this.#rootNode]];
-        for (const key of Array.isArray(keys) ? keys : [keys]) {
+        for (const key of keys) {
             if (!node.children.has(key)) {
                 return false;
             }
@@ -101,13 +100,13 @@ export class DeepMap<K, V> extends Map<K[], V> {
         return true;
     }
 
-    take(keys: K[] | K): V | undefined {
+    take(keys: K[]): V | undefined {
         const value = this.get(keys);
         this.delete(keys);
         return value;
     }
 
-    clone(keys: K[] | K): DeepMap<K, V> {
+    clone(keys: K[]): DeepMap<K, V> {
         const node = this.#node(keys);
         const map = new DeepMap<K, V>();
         if (node) {
@@ -118,7 +117,7 @@ export class DeepMap<K, V> extends Map<K[], V> {
         return map;
     }
 
-    extract(keys: K[] | K): DeepMap<K, V> {
+    extract(keys: K[]): DeepMap<K, V> {
         const node = this.#node(keys);
         const map = new DeepMap<K, V>();
         if (node) {
@@ -134,9 +133,9 @@ export class DeepMap<K, V> extends Map<K[], V> {
         return map;
     }
 
-    append(keys: K[] | K, iterable: Iterable<readonly [K[], V]>): this {
+    append(keys: K[], iterable: Iterable<readonly [K[], V]>): this {
         for (const entry of iterable) {
-            this.set((Array.isArray(keys) ? keys : [keys]).concat(entry[0]), entry[1]);
+            this.set(keys.concat(entry[0]), entry[1]);
         }
         return this;
     }
@@ -151,9 +150,9 @@ export class DeepMap<K, V> extends Map<K[], V> {
         return count;
     }
 
-    forEach(callbackfn: (value: V, key: K[], map: Map<K[], V>) => void): void {
+    forEach(callbackfn: (value: V, key: K[], map: Map<K[], V>) => void, thisArg?: unknown): void {
         for (const entry of this.#entries(this.#rootNode, [])) {
-            callbackfn(entry[1], entry[0], this);
+            callbackfn.call(thisArg, entry[1], entry[0], this);
         }
     }
 
@@ -175,5 +174,26 @@ export class DeepMap<K, V> extends Map<K[], V> {
         for (const entry of this.#entries(this.#rootNode, [])) {
             yield entry[1];
         }
+    }
+
+    [Symbol.toStringTag]: string = 'DeepMap';
+
+    getOrInsert(key: K[], defaultValue: V): V {
+        if (this.has(key)) {
+            return this.get(key)!;
+        }
+        this.set(key, defaultValue);
+
+        return defaultValue;
+    }
+
+    getOrInsertComputed(key: K[], callback: (key: K[]) => V): V {
+        if (this.has(key)) {
+            return this.get(key)!;
+        }
+        const value = callback(key);
+        this.set(key, value);
+
+        return value;
     }
 }

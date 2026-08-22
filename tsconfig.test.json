@@ -1,9 +1,9 @@
 {
     "extends": "./tsconfig.json",
     "compilerOptions": {
-        "module": "commonjs",
+        "module": "node16",
         "outDir": "test",
-        "target": "es2015"
+        "target": "es2022"
     },
     "exclude": ["dist", "node_modules"]
 }

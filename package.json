@@ -1,6 +1,6 @@
 {
   "name": "@just-io/utils",
-  "version": "2.1.0",
+  "version": "2.2.0",
   "description": "Utility functional",
   "types": "dist/types",
   "main": "dist/cjs/index.js",
@@ -41,7 +41,7 @@
     "TypeScript"
   ],
   "devDependencies": {
-    "@types/node": "^20.9.0",
+    "@types/node": "^26.2.0",
     "@typescript-eslint/eslint-plugin": "^6.10.0",
     "@typescript-eslint/parser": "^6.10.0",
     "eslint": "^8.53.0",
@@ -52,7 +52,7 @@
     "prettier": "^3.0.3",
     "ts-node": "^10.9.1",
     "tslib": "^2.6.2",
-    "typescript": "^5.2.2"
+    "typescript": "^6.0.3"
   },
   "files": [
     "dist"
