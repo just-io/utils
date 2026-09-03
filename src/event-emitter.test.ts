@@ -214,13 +214,13 @@ describe('EventEmitter', () => {
         eventEmitter.on('one', fnOne);
         eventEmitter.on('two', fnTwo);
 
-        assert.deepEqual(eventEmitter.getSuscribers('one').size, 1);
-        assert.deepEqual(eventEmitter.getSuscribers('two').size, 1);
+        assert.deepEqual(eventEmitter.getSubscribers('one').size, 1);
+        assert.deepEqual(eventEmitter.getSubscribers('two').size, 1);
 
         eventEmitter.unsubscribeAll('one');
 
-        assert.deepEqual(eventEmitter.getSuscribers('one').size, 0);
-        assert.deepEqual(eventEmitter.getSuscribers('two').size, 1);
+        assert.deepEqual(eventEmitter.getSubscribers('one').size, 0);
+        assert.deepEqual(eventEmitter.getSubscribers('two').size, 1);
     });
 
     test('should unsubscribe all subscribers', () => {
@@ -232,13 +232,13 @@ describe('EventEmitter', () => {
         eventEmitter.on('one', fnOne);
         eventEmitter.on('two', fnTwo);
 
-        assert.deepEqual(eventEmitter.getSuscribers('one').size, 1);
-        assert.deepEqual(eventEmitter.getSuscribers('two').size, 1);
+        assert.deepEqual(eventEmitter.getSubscribers('one').size, 1);
+        assert.deepEqual(eventEmitter.getSubscribers('two').size, 1);
 
         eventEmitter.unsubscribeAll();
 
-        assert.deepEqual(eventEmitter.getSuscribers('one').size, 0);
-        assert.deepEqual(eventEmitter.getSuscribers('two').size, 0);
+        assert.deepEqual(eventEmitter.getSubscribers('one').size, 0);
+        assert.deepEqual(eventEmitter.getSubscribers('two').size, 0);
     });
 
     test('should create store', () => {

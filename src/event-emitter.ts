@@ -95,7 +95,7 @@ export class EventEmitter<E extends EventMap> implements Eventable<E> {
         [K in keyof E]?: WeakSet<Subscriber<E[K]>>;
     } = {};
 
-    getSuscribers<K extends keyof E>(event: K): Set<Subscriber<E[K]>> {
+    getSubscribers<K extends keyof E>(event: K): Set<Subscriber<E[K]>> {
         if (!this.#subscribers[event]) {
             this.#subscribers[event] = new Set();
             this.#onceSubscribers[event] = new WeakSet();
@@ -105,7 +105,7 @@ export class EventEmitter<E extends EventMap> implements Eventable<E> {
     }
 
     on<K extends keyof E>(event: K, subscriber: Subscriber<E[K]>): this {
-        const subscribers = this.getSuscribers(event);
+        const subscribers = this.getSubscribers(event);
         subscribers.add(subscriber);
         return this;
     }
@@ -118,7 +118,7 @@ export class EventEmitter<E extends EventMap> implements Eventable<E> {
 
     off<K extends keyof E>(event: K, subscriber: Subscriber<E[K]>): boolean {
         this.#onceSubscribers[event]?.delete(subscriber);
-        return this.getSuscribers(event).delete(subscriber);
+        return this.getSubscribers(event).delete(subscriber);
     }
 
     emit<K extends keyof E>(event: K, ...args: E[K]): void;
@@ -127,7 +127,7 @@ export class EventEmitter<E extends EventMap> implements Eventable<E> {
         if (!this.#subscribers[event]) {
             return;
         }
-        this.getSuscribers(event).forEach((subscriber) => {
+        this.getSubscribers(event).forEach((subscriber) => {
             subscriber(...args);
             if (this.#onceSubscribers[event]?.has(subscriber)) {
                 this.off(event, subscriber);
@@ -138,7 +138,7 @@ export class EventEmitter<E extends EventMap> implements Eventable<E> {
     unsubscribeAll(): void;
     unsubscribeAll<K extends keyof E>(event: K): void;
     unsubscribeAll<K extends keyof E>(event?: K): void {
-        if (event) {
+        if (event !== undefined) {
             this.#subscribers[event] = new Set();
             this.#onceSubscribers[event] = new WeakSet();
         } else {

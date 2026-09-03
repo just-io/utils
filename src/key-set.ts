@@ -144,12 +144,6 @@ export class KeySet<T, K> implements Set<T> {
                 return false;
             }
         }
-        const thisSet = new Set(this);
-        for (const key of other.keys() as IterableIterator<unknown>) {
-            if (thisSet.has(key as T)) {
-                return false;
-            }
-        }
         return true;
     }
 }

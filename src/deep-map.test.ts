@@ -164,6 +164,16 @@ describe('DeepMap', () => {
 
             assert.equal(deepMap.has([]), false);
         });
+
+        test('should delete only child', () => {
+            const deepMap = new DeepMap<string, string>();
+            deepMap.set(['one'], 'str');
+            deepMap.set(['one', 'two'], 'str');
+
+            assert.equal(deepMap.delete(['one', 'two']), true);
+
+            assert.equal(deepMap.has(['one']), true);
+        });
     });
 
     describe('method take', () => {
