@@ -10,7 +10,7 @@ export class Notifier<E extends unknown[]> implements Notifiable<E> {
 
     #onceSubscribers: WeakSet<Subscriber<E>> = new WeakSet();
 
-    getSuscribers(): Set<Subscriber<E>> {
+    getSubscribers(): Set<Subscriber<E>> {
         return this.#subscribers;
     }
 
@@ -28,12 +28,18 @@ export class Notifier<E extends unknown[]> implements Notifiable<E> {
     }
 
     notify(...args: E): void {
+        const unsubscribers = new Set<Subscriber<E>>();
         this.#subscribers.forEach((subscriber) => {
-            subscriber(...args);
+            try {
+                subscriber(...args);
+            } catch {}
             if (this.#onceSubscribers.has(subscriber)) {
-                this.unsubscribe(subscriber);
+                unsubscribers.add(subscriber);
             }
         });
+        for (const subscriber of unsubscribers) {
+            this.unsubscribe(subscriber);
+        }
     }
 
     unsubscribeAll(): void {
@@ -127,12 +133,18 @@ export class EventEmitter<E extends EventMap> implements Eventable<E> {
         if (!this.#subscribers[event]) {
             return;
         }
+        const unsubscribers = new Set<Subscriber<E[K]>>();
         this.getSubscribers(event).forEach((subscriber) => {
-            subscriber(...args);
+            try {
+                subscriber(...args);
+            } catch {}
             if (this.#onceSubscribers[event]?.has(subscriber)) {
-                this.off(event, subscriber);
+                unsubscribers.add(subscriber);
             }
         });
+        for (const subscriber of unsubscribers) {
+            this.off(event, subscriber);
+        }
     }
 
     unsubscribeAll(): void;

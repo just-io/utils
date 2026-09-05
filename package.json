@@ -1,6 +1,6 @@
 {
   "name": "@just-io/utils",
-  "version": "2.2.1",
+  "version": "2.2.2",
   "description": "Utility functional",
   "types": "dist/types",
   "main": "dist/cjs/index.js",
@@ -19,7 +19,7 @@
   },
   "repository": {
     "type": "git",
-    "url": "git+https://github.com/just-io/schema.git"
+    "url": "git+https://github.com/just-io/utils.git"
   },
   "scripts": {
     "test": "tsc --noEmit && rm -rf test && tsc -p tsconfig.test.json && sh ./fixup.test.sh && node --test \"test/**/*.test.js\" && rm -rf test",
@@ -37,7 +37,7 @@
   "keywords": [
     "Utils",
     "DeepMap",
-    "EventEmmiter",
+    "EventEmitter",
     "TypeScript"
   ],
   "devDependencies": {

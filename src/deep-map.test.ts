@@ -97,7 +97,7 @@ describe('DeepMap', () => {
             assert.equal(deepMap.has(['one']), true);
         });
 
-        test('should return false on existing key', () => {
+        test('should return false on missing key', () => {
             const deepMap = new DeepMap<string, string>();
 
             assert.equal(deepMap.has(['one']), false);

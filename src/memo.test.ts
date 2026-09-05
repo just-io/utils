@@ -46,7 +46,7 @@ describe('memo', () => {
             fn();
         }
 
-        const memoSetFilterValue = memo(setFilterValue, (values) => values, true);
+        const memoSetFilterValue = memo(setFilterValue, (values) => values.slice(), true);
 
         memoSetFilterValue([]);
 

@@ -30,7 +30,7 @@ export class DeepMap<K, V> implements Map<K[], V> {
 
     *#entries(node: DeepMapNode<K, V>, key: K[]): Generator<[K[], V]> {
         if (node.value !== undefined) {
-            yield [key, node.value.value];
+            yield [key.slice(), node.value.value];
         }
         for (const child of node.children) {
             yield* this.#entries(child[1], key.concat(child[0]));
@@ -90,7 +90,7 @@ export class DeepMap<K, V> implements Map<K[], V> {
         node.value = undefined;
 
         for (let i = 0; i < entries.length - 1; i++) {
-            if (entries[i][1].children.size === 0 && entries[i][1].value !== undefined) {
+            if (entries[i][1].children.size === 0 && entries[i][1].value === undefined) {
                 entries[i + 1][1].children.delete(entries[i][0]);
             } else {
                 break;

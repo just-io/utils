@@ -36,6 +36,26 @@ describe('Notifier', () => {
         assert.deepEqual(fn2.mock.callCount(), 1);
     });
 
+    test('should call two subscriber when one throw an error', () => {
+        // eslint-disable-next-line @typescript-eslint/no-unused-vars
+        const fn1 = mock.fn((first: string, second: string) => {
+            throw new Error();
+        });
+        // eslint-disable-next-line @typescript-eslint/no-unused-vars
+        const fn2 = mock.fn((first: string, second: string) => {});
+        const notifier = new Notifier<Event>();
+        notifier.subscribe(fn1);
+        notifier.subscribe(fn2);
+
+        assert.deepEqual(fn1.mock.callCount(), 0);
+        assert.deepEqual(fn2.mock.callCount(), 0);
+
+        notifier.notify('a', 'b');
+
+        assert.deepEqual(fn1.mock.callCount(), 1);
+        assert.deepEqual(fn2.mock.callCount(), 1);
+    });
+
     test('should remove subscriber', () => {
         // eslint-disable-next-line @typescript-eslint/no-unused-vars
         const fn = mock.fn((first: string, second: string) => {});
@@ -149,6 +169,31 @@ describe('EventEmitter', () => {
     test('should call subscribers on two event', () => {
         // eslint-disable-next-line @typescript-eslint/no-unused-vars
         const fnOne = mock.fn((first: number) => {});
+        // eslint-disable-next-line @typescript-eslint/no-unused-vars
+        const fnTwo = mock.fn((first: string, second: number) => {});
+        const eventEmitter = new EventEmitter<EventMap>();
+        eventEmitter.on('one', fnOne);
+        eventEmitter.on('two', fnTwo);
+
+        assert.deepEqual(fnOne.mock.callCount(), 0);
+        assert.deepEqual(fnTwo.mock.callCount(), 0);
+
+        eventEmitter.emit('one', 1);
+
+        assert.deepEqual(fnOne.mock.callCount(), 1);
+        assert.deepEqual(fnTwo.mock.callCount(), 0);
+
+        eventEmitter.emit('two', '1', 2);
+
+        assert.deepEqual(fnOne.mock.callCount(), 1);
+        assert.deepEqual(fnTwo.mock.callCount(), 1);
+    });
+
+    test('should call subscribers on two event when one throw an error', () => {
+        // eslint-disable-next-line @typescript-eslint/no-unused-vars
+        const fnOne = mock.fn((first: number) => {
+            throw new Error();
+        });
         // eslint-disable-next-line @typescript-eslint/no-unused-vars
         const fnTwo = mock.fn((first: string, second: number) => {});
         const eventEmitter = new EventEmitter<EventMap>();

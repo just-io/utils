@@ -305,8 +305,8 @@ describe('KeySet', () => {
 
             const arr: [string, number][] = [];
 
-            for (const [key, value] of keySet) {
-                arr.push([key, value]);
+            for (const value of keySet) {
+                arr.push(value);
             }
 
             assert.deepStrictEqual(arr, [
